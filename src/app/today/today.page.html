@@ -1,0 +1,149 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <ion-icon name="medkit" style="margin-right: 8px;"></ion-icon>
+      Medicamentos de today
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Pull to refresh -->
+  <ion-refresher slot="fixed" (ionRefresh)="handleRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Saludo y fecha -->
+  <div class="header-section">
+    <h1 class="saludo">{{ saludo }}</h1>
+    <p class="fecha">{{ fechatoday }}</p>
+  </div>
+
+  <!-- Estadísticas del día -->
+  <ion-card class="estadisticas-card">
+    <ion-card-content>
+      <ion-grid>
+        <ion-row>
+          <ion-col size="3" class="text-center">
+            <div class="stat-number">{{ estadisticastoday.total }}</div>
+            <div class="stat-label">Total</div>
+          </ion-col>
+          <ion-col size="3" class="text-center">
+            <div class="stat-number success">{{ estadisticastoday.tomadas }}</div>
+            <div class="stat-label">Tomadas</div>
+          </ion-col>
+          <ion-col size="3" class="text-center">
+            <div class="stat-number warning">{{ estadisticastoday.pendientes }}</div>
+            <div class="stat-label">Pendientes</div>
+          </ion-col>
+          <ion-col size="3" class="text-center">
+            <div class="stat-number danger">{{ estadisticastoday.omitidas }}</div>
+            <div class="stat-label">Omitidas</div>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Próxima toma -->
+  <ion-card *ngIf="proximaToma" class="proxima-toma-card" [style.border-left-color]="proximaToma.medicamento_color">
+    <ion-card-header>
+      <ion-card-subtitle>
+        <ion-icon name="alarm"></ion-icon>
+        PRÓXIMA TOMA - {{ proximaToma.hora }}
+        <ion-badge *ngIf="estaRetrasada(proximaToma.hora)" color="danger" style="margin-left: 10px;">
+          RETRASADA
+        </ion-badge>
+      </ion-card-subtitle>
+      <ion-card-title>{{ proximaToma.medicamento_nombre }}</ion-card-title>
+    </ion-card-header>
+    <ion-card-content>
+      <p class="dosis-text">
+        <strong>Dosis:</strong> {{ proximaToma.medicamento_dosis }}
+      </p>
+      <p *ngIf="proximaToma.con_comida" class="comida-text">
+        <ion-icon name="restaurant"></ion-icon>
+        Tomar con comida
+      </p>
+      <ion-button 
+        expand="block" 
+        size="large" 
+        color="success"
+        (click)="marcarComoTomada(proximaToma)"
+        class="boton-tomar">
+        <ion-icon name="checkmark-done" slot="start"></ion-icon>
+        MARCAR COMO TOMADA
+      </ion-button>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de medicamentos del día -->
+  <div class="section-title">
+    <h2>Todas las tomas de today</h2>
+  </div>
+
+  <ion-card *ngFor="let toma of tomastoday" 
+            class="toma-card" 
+            [class.tomada]="toma.estado === 'tomada'"
+            [class.omitida]="toma.estado === 'omitida'"
+            [style.border-left-color]="toma.medicamento_color">
+    <ion-card-content>
+      <ion-grid>
+        <ion-row class="ion-align-items-center">
+          <ion-col size="2" class="hora-col">
+            <div class="hora-text">{{ toma.hora }}</div>
+            <ion-icon 
+              [name]="getIconoEstado(toma.estado)" 
+              [color]="getColorEstado(toma.estado)"
+              class="estado-icon">
+            </ion-icon>
+          </ion-col>
+          
+          <ion-col size="6">
+            <h3 class="medicamento-nombre">{{ toma.medicamento_nombre }}</h3>
+            <p class="medicamento-dosis">{{ toma.medicamento_dosis }}</p>
+            <ion-chip *ngIf="toma.con_comida" color="primary" class="chip-comida">
+              <ion-icon name="restaurant"></ion-icon>
+              <ion-label>Con comida</ion-label>
+            </ion-chip>
+          </ion-col>
+          
+          <ion-col size="4" class="acciones-col" *ngIf="toma.estado === 'pendiente'">
+            <ion-button 
+              fill="solid" 
+              color="success"
+              (click)="marcarComoTomada(toma)"
+              class="boton-accion">
+              <ion-icon name="checkmark-circle" slot="icon-only"></ion-icon>
+            </ion-button>
+            <ion-button 
+              fill="outline" 
+              color="danger"
+              (click)="marcarComoOmitida(toma)"
+              class="boton-accion">
+              <ion-icon name="close-circle" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-col>
+
+          <ion-col size="4" class="estado-col" *ngIf="toma.estado !== 'pendiente'">
+            <ion-badge [color]="getColorEstado(toma.estado)" class="estado-badge">
+              {{ toma.estado === 'tomada' ? 'TOMADA' : 'OMITIDA' }}
+            </ion-badge>
+            <p class="hora-tomada" *ngIf="toma.fecha_hora_tomada">
+              {{ toma.fecha_hora_tomada | date:'HH:mm' }}
+            </p>
+          </ion-col>
+        </ion-row>
+      </ion-grid>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Mensaje cuando no hay medicamentos -->
+  <ion-card *ngIf="tomastoday.length === 0" class="empty-card">
+    <ion-card-content class="text-center">
+      <ion-icon name="medkit" style="font-size: 64px; color: var(--ion-color-medium);"></ion-icon>
+      <h2>No hay medicamentos programados para today</h2>
+      <p>Ve a la pestaña "Medicamentos" para añadir tus medicinas</p>
+    </ion-card-content>
+  </ion-card>
+</ion-content>

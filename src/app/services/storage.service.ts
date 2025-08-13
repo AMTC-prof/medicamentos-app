@@ -128,9 +128,9 @@ export class StorageService {
 
   // === MÉTODOS PARA TOMAS ===
   
-  async getTomasHoy(): Promise<any[]> {
-    const hoy = new Date().toISOString().split('T')[0];
-    const tomasHoy: any[] = [];
+  async getTomastoday(): Promise<any[]> {
+    const today = new Date().toISOString().split('T')[0];
+    const tomastoday: any[] = [];
     
     for (const medicamento of this.medicamentos.filter(m => m.activo)) {
       const horariosM = this.horarios.filter(h => 
@@ -138,15 +138,15 @@ export class StorageService {
       );
       
       for (const horario of horariosM) {
-        const fechaHora = `${hoy}T${horario.hora}:00`;
+        const fechaHora = `${today}T${horario.hora}:00`;
         let toma = this.tomas.find(t => 
           t.medicamento_id === medicamento.id && 
           t.horario_id === horario.id &&
-          t.fecha_hora_programada.startsWith(hoy)
+          t.fecha_hora_programada.startsWith(today)
         );
         
         if (!toma) {
-          // Crear toma para hoy si no existe
+          // Crear toma para today si no existe
           toma = {
             id: this.nextId.tomas++,
             medicamento_id: medicamento.id!,
@@ -157,7 +157,7 @@ export class StorageService {
           this.tomas.push(toma);
         }
         
-        tomasHoy.push({
+        tomastoday.push({
           ...toma,
           medicamento_nombre: medicamento.nombre,
           medicamento_dosis: medicamento.dosis,
@@ -168,9 +168,9 @@ export class StorageService {
       }
     }    
 
-    tomasHoy.sort((a, b) => a.hora.localeCompare(b.hora));
+    tomastoday.sort((a, b) => a.hora.localeCompare(b.hora));
     this.saveToLocalStorage();
-    return tomasHoy;
+    return tomastoday;
   }
 
   async marcarTomada(tomaId: number): Promise<void> {
