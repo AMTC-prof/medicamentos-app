@@ -9,18 +9,18 @@ export const routes: Routes = [
       {
         path: 'today',
         loadComponent: () =>
-          import('../today/today.page').then((m) => m.TodayPage),
+          import('../pages/today/today.page').then((m) => m.TodayPage),
       },
       {
-        path: 'tab2',
+        path: 'medication-planner',
         loadComponent: () =>
-          import('../tab2/tab2.page').then((m) => m.Tab2Page),
+          import('../pages/medication-planner/medication-planner.page').then((m) => m.MedicationPlannerPage),
       },
-      {
-        path: 'tab3',
-        loadComponent: () =>
-          import('../tab3/tab3.page').then((m) => m.Tab3Page),
-      },
+      // {
+      //   path: 'tab3',
+      //   loadComponent: () =>
+      //     import('../tab3/tab3.page').then((m) => m.Tab3Page),
+      // },
       {
         path: '',
         redirectTo: '/tabs/today',

@@ -1,0 +1,104 @@
+<ion-header [translucent]="true">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <ion-icon name="medkit" style="margin-right: 8px;"></ion-icon>
+      Mis Medicamentos
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Search bar -->
+  <ion-searchbar
+    placeholder="Buscar medicamento..."
+    [(ngModel)]="searchTerm"
+    (ionInput)="onSearchChange($event)"
+    animated="true"
+    class="custom-searchbar">
+  </ion-searchbar>
+
+  <!-- Segment for filtering -->
+  <ion-segment value="active" (ionChange)="onSegmentChange($event)" class="medication-segment">
+    <ion-segment-button value="active">
+      <ion-label>Activos</ion-label>
+    </ion-segment-button>
+    <ion-segment-button value="all">
+      <ion-label>Todos</ion-label>
+    </ion-segment-button>
+  </ion-segment>
+
+  <!-- Medications list -->
+  <div class="medications-container">
+    <ion-card *ngFor="let medication of filteredMedications" 
+              class="medication-card"
+              [style.border-left-color]="medication.color">
+      
+      <ion-card-header>
+        <ion-card-subtitle>
+          <ion-chip [style.background-color]="medication.color + '20'" 
+                    [style.border-color]="medication.color"
+                    class="medication-chip">
+            <ion-icon name="medkit"></ion-icon>
+            <ion-label>{{ medication.scheduleCount }} {{ medication.scheduleCount === 1 ? 'toma' : 'tomas' }} al día</ion-label>
+          </ion-chip>
+        </ion-card-subtitle>
+        <ion-card-title>{{ medication.nombre }}</ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        <div class="medication-info">
+          <p class="dose-info" *ngIf="medication.dosis">
+            <strong>Dosis:</strong> {{ medication.dosis }}
+          </p>
+          <p class="description-info" *ngIf="medication.descripcion">
+            {{ medication.descripcion }}
+          </p>
+          <div class="schedule-info">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ medication.scheduleText }}</span>
+          </div>
+          
+          <!-- Schedule chips -->
+          <div class="schedule-chips" *ngIf="medication.schedules && medication.schedules.length > 0">
+            <ion-chip *ngFor="let schedule of medication.schedules" 
+                      color="primary" 
+                      class="time-chip">
+              <ion-icon name="alarm"></ion-icon>
+              <ion-label>{{ schedule.hora }}</ion-label>
+              <ion-icon name="restaurant" *ngIf="schedule.con_comida"></ion-icon>
+            </ion-chip>
+          </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="medication-actions">
+          <ion-button fill="clear" size="small" (click)="editSchedules(medication)">
+            <ion-icon name="time" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="small" (click)="editMedication(medication)">
+            <ion-icon name="create" slot="icon-only"></ion-icon>
+          </ion-button>
+          <ion-button fill="clear" size="small" color="danger" (click)="deleteMedication(medication)">
+            <ion-icon name="trash" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Empty state -->
+    <div class="empty-state" *ngIf="filteredMedications.length === 0">
+      <ion-icon name="medkit-outline"></ion-icon>
+      <h2>No hay medicamentos</h2>
+      <p *ngIf="searchTerm">No se encontraron medicamentos con "{{ searchTerm }}"</p>
+      <p *ngIf="!searchTerm && selectedSegment === 'active'">Añade tu primer medicamento pulsando el botón +</p>
+      <p *ngIf="!searchTerm && selectedSegment === 'all'">No tienes medicamentos registrados</p>
+    </div>
+  </div>
+
+  <!-- FAB Button -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openAddMedicationModal()" color="primary" size="large">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

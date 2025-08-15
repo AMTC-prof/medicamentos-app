@@ -36,7 +36,7 @@ import {
   medkit,
   checkmarkDone
 } from 'ionicons/icons';
-import { StorageService } from '../services/storage.service';
+import { StorageService } from 'src/app/services/storage.service';
 
 @Component({
   selector: 'app-today',
